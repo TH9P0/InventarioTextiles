@@ -3,20 +3,10 @@ package com.example.inventariotextiles
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.inventariotextiles.Screens.PantallaAyuda
-import com.example.inventariotextiles.Screens.ProductoMto
-import com.example.inventariotextiles.Screens.RGBColorPicker
-import com.example.inventariotextiles.Screens.UIPrincipal
+import com.example.inventariotextiles.presentation.view.ListaProductosScreen
 import com.example.inventariotextiles.ui.theme.MtoProductoTheme
-
 
 class MainActivity : ComponentActivity() {
 
@@ -24,53 +14,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MtoProductoTheme {
-                Navegacion()
+                ListaProductosScreen(navController = rememberNavController(), LocalContext.current)
             }
         }
     }
-}
-
-@Composable
-fun Navegacion(){
-    val context = LocalContext.current
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = "PantallaPrincipal"){
-        composable("PantallaPrincipal"){
-            UIPrincipal(navController)
-        }
-        composable("ColorPicker") {
-            RGBColorPicker(context,navController)
-        }
-        composable("PantallaAyuda"){
-            PantallaAyuda(navController)
-        }
-        composable(
-            "ProductoMto?id={id}",
-            arguments = listOf(navArgument("id") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
-
-        ){ backStackEntry ->
-            ProductoMto(
-                id = backStackEntry.arguments?.getString("id"),
-                navController = navController
-            )
-        }
-    }
-}
-
-data class Producto(
-    val id: String,
-    val name: String,
-    val price: String,
-    val description: String,
-    val imagen: String
-)
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewUIPrincipal() {
-    MtoProductoTheme { UIPrincipal(rememberNavController()) }
 }
