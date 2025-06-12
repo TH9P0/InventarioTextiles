@@ -11,8 +11,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.inventariotextiles.Screens.LoginScreen
+import com.example.inventariotextiles.Screens.PantallaAuditoria
 import com.example.inventariotextiles.Screens.PantallaAyuda
-import com.example.inventariotextiles.Screens.ProductoMto
+import com.example.inventariotextiles.Screens.PantallaContenedores
+import com.example.inventariotextiles.Screens.PantallaPackingList
+import com.example.inventariotextiles.Screens.PantallaTransferencia
+import com.example.inventariotextiles.Screens.PantallaUsuarios
+import com.example.inventariotextiles.Screens.ProductoAlmacen
 import com.example.inventariotextiles.Screens.RGBColorPicker
 import com.example.inventariotextiles.Screens.UIPrincipal
 import com.example.inventariotextiles.ui.theme.MtoProductoTheme
@@ -34,15 +40,37 @@ class MainActivity : ComponentActivity() {
 fun Navegacion(){
     val context = LocalContext.current
     val navController = rememberNavController()
-    NavHost(navController, startDestination = "PantallaPrincipal"){
-        composable("PantallaPrincipal"){
-            UIPrincipal(navController)
+    NavHost(navController, startDestination = "PantallaLogin"){
+        composable("PantallaLogin") {
+            LoginScreen(context, navController)
         }
         composable("ColorPicker") {
             RGBColorPicker(context,navController)
         }
         composable("PantallaAyuda"){
             PantallaAyuda(navController)
+        }
+        composable("PantallaUsuarios"){
+            PantallaUsuarios(navController)
+        }
+
+        composable("PantallaAuditoria"){
+            PantallaAuditoria(navController)
+        }
+        composable("PantallaPacking"){
+            PantallaPackingList(navController)
+        }
+        composable("PantallaAlmacen") {  // Nombre corregido
+            ProductoAlmacen(id = null, navController = navController)
+        }
+        composable("PantallaPrincipal") {  // Nombre corregido
+            UIPrincipal(navController)
+        }
+        composable("PantallaTransferir") {
+            PantallaTransferencia(navController)
+        }
+        composable("PantallaContenedores") {
+            PantallaContenedores(navController)
         }
         composable(
             "ProductoMto?id={id}",
@@ -53,7 +81,7 @@ fun Navegacion(){
             })
 
         ){ backStackEntry ->
-            ProductoMto(
+            ProductoAlmacen(
                 id = backStackEntry.arguments?.getString("id"),
                 navController = navController
             )

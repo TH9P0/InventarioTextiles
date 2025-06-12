@@ -54,6 +54,7 @@ dependencies {
     implementation ("androidx.compose:compose-bom:2024.03.00")
 
     implementation ("androidx.compose.material:material-icons-extended")
+    implementation(libs.ads.mobile.sdk)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

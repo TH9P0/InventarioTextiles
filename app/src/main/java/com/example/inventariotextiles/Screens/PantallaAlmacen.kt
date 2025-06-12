@@ -72,7 +72,7 @@ import androidx.core.content.edit
 import com.example.inventariotextiles.DBHelper
 
 @Composable
-fun ProductoMto(id:String?, navController: NavController){
+fun ProductoAlmacen (id:String?, navController: NavController){
     val context = LocalContext.current
     val auxSQLite = DBHelper(context)
 
