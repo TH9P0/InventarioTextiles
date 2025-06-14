@@ -101,7 +101,7 @@ fun GridTransferenciaButtons(navControlador: NavController) {
     LazyColumn {
         item {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                MainTransferCardButton("Mercancia") { navControlador.navigate("mercancia") }
+                MainTransferCardButton("Mercancia") { navControlador.navigate("PantallaTransfer") }
                 MainTransferCardButton("Historia") { navControlador.navigate("historia") }
             }
         }

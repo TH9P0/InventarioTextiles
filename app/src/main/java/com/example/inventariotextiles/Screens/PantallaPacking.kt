@@ -108,7 +108,7 @@ fun GridPackingButtons(navControlador: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MainPackingCardButton("Crear") { navControlador.navigate("crear") }
+                MainPackingCardButton("Crear") { navControlador.navigate("PantallaCrearPacking") }
                 MainPackingCardButton("Historico") { navControlador.navigate("historico") }
             }
         }

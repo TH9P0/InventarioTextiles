@@ -15,8 +15,10 @@ import com.example.inventariotextiles.Screens.LoginScreen
 import com.example.inventariotextiles.Screens.PantallaAuditoria
 import com.example.inventariotextiles.Screens.PantallaAyuda
 import com.example.inventariotextiles.Screens.PantallaContenedores
+import com.example.inventariotextiles.Screens.PantallaCrearPackingList
 import com.example.inventariotextiles.Screens.PantallaPackingList
 import com.example.inventariotextiles.Screens.PantallaTransferencia
+import com.example.inventariotextiles.Screens.PantallaTransferir
 import com.example.inventariotextiles.Screens.PantallaUsuarios
 import com.example.inventariotextiles.Screens.ProductoAlmacen
 import com.example.inventariotextiles.Screens.RGBColorPicker
@@ -71,6 +73,12 @@ fun Navegacion(){
         }
         composable("PantallaContenedores") {
             PantallaContenedores(navController)
+        }
+        composable("PantallaCrearPacking") {
+            PantallaCrearPackingList(navController)
+        }
+        composable("PantallaTransfer") {
+            PantallaTransferir(navController)
         }
         composable(
             "ProductoMto?id={id}",
