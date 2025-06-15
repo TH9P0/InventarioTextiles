@@ -24,7 +24,7 @@ import com.example.inventariotextiles.domain.model.Producto
 import com.example.inventariotextiles.presentation.view.components.ProductCard
 import com.example.inventariotextiles.presentation.view.states.ListaProductosUIState
 import com.example.inventariotextiles.presentation.viewModel.ListaProductosViewModel
-import com.example.inventariotextiles.ui.theme.MtoProductoTheme
+import com.example.inventariotextiles.ui.theme.InventarioTextilesTheme
 import kotlin.let
 
 @Composable
@@ -83,7 +83,7 @@ fun ListaProductos(productList: List<Producto>, navController: NavController, on
 @Preview(showBackground = true)
 @Composable
 fun ListaProductosScreenPreview() {
-    MtoProductoTheme {
+    InventarioTextilesTheme {
         val sampleProducts = listOf(
             Producto("1", "Zapatos", "45.99", "Zapatos deportivos"),
             Producto("2", "Camiseta", "19.99", "Camiseta de algodón")

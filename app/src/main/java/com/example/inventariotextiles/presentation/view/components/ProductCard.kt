@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.inventariotextiles.domain.model.Producto
-import com.example.inventariotextiles.ui.theme.MtoProductoTheme
+import com.example.inventariotextiles.ui.theme.InventarioTextilesTheme
 import kotlin.text.isEmpty
 
 @Composable
@@ -140,5 +140,5 @@ fun ProductCardPreview() {
         description = "Sin Descripcion"
     )
 
-    MtoProductoTheme { ProductCard(product = producto, navController = rememberNavController()){} }
+    InventarioTextilesTheme { ProductCard(product = producto, navController = rememberNavController()){} }
 }
