@@ -1,4 +1,4 @@
-package com.example.inventariotextiles.presentation.view
+package com.example.inventariotextiles.features.inventory.presentation.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,7 +14,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.example.inventariotextiles.presentation.viewModel.MtoProductoViewModel
+import com.example.inventariotextiles.features.inventory.presentation.viewModel.MtoProductoViewModel
 import kotlinx.coroutines.launch
 import kotlin.text.isNullOrEmpty
 

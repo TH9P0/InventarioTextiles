@@ -1,4 +1,4 @@
-package com.example.inventariotextiles.presentation.viewModel
+package com.example.inventariotextiles.features.inventory.presentation.viewModel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

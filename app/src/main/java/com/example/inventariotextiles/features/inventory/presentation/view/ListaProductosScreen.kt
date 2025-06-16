@@ -1,4 +1,4 @@
-package com.example.inventariotextiles.presentation.view
+package com.example.inventariotextiles.features.inventory.presentation.view
 
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.inventariotextiles.domain.model.Producto
 import com.example.inventariotextiles.presentation.view.components.ProductCard
 import com.example.inventariotextiles.presentation.view.states.ListaProductosUIState
-import com.example.inventariotextiles.presentation.viewModel.ListaProductosViewModel
+import com.example.inventariotextiles.features.inventory.presentation.viewModel.ListaProductosViewModel
 import com.example.inventariotextiles.ui.theme.InventarioTextilesTheme
 import kotlin.let
 

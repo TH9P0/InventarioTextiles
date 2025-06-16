@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 
 class PackingListViewModel:ViewModel() {
     val menuItems = listOf(
-        "Crear" to "PantallaRecibir",
+        "Crear" to "CreatePackingList",
         "Historico" to "PantallaConsultar",
         "Consultar" to "PantallaHistorico",
         "Reportes" to "PantallaReportes"
