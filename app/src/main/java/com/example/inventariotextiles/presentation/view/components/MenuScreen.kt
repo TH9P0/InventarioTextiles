@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainMenu(title:String, menuItems: List<Pair<String,String>>,navControlador: NavController) {
+fun MainMenu(title:String, menuItems: List<Pair<String,String>>, navControlador: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 

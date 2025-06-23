@@ -10,6 +10,6 @@ import com.example.inventariotextiles.presentation.view.components.MainMenu
 fun InventoryMenu(
     navController: NavController,
     viewModel: InventoryViewModel = viewModel()
-){
+) {
     MainMenu("Inventario", viewModel.menuItems, navController)
 }

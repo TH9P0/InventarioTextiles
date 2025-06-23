@@ -1,156 +1,164 @@
+// features/inventory/presentation/view/MtoProductsScreen.kt
 package com.example.inventariotextiles.features.inventory.presentation.view
 
+import android.app.Application
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.inventariotextiles.domain.model.Prenda
 import com.example.inventariotextiles.features.inventory.presentation.viewModel.MtoProductoViewModel
-import kotlinx.coroutines.launch
-import kotlin.text.isNullOrEmpty
+import com.example.inventariotextiles.presentation.view.states.MtoProductsUIState
+import java.util.UUID
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MtoProductoScreen(viewModel: MtoProductoViewModel){
-    Box(Modifier
-        .fillMaxSize()
-        .padding(16.dp)){
-        ProductoDetallado(Modifier.fillMaxWidth(), viewModel)
-    }
-}
-
-@Composable
-fun ProductoDetallado(modifier: Modifier, viewModel: MtoProductoViewModel) {
-
-    val nombre: String = viewModel.nombre.collectAsState().value
-    val precio: String = viewModel.precio.collectAsState().value
-    val descripcion: String = viewModel.descripcion.collectAsState().value
-    val botonEnabled: Boolean = viewModel.botonEnabled.collectAsState().value
-    val isLoading: Boolean = viewModel.isLoading.collectAsState().value
-    val coroutineScope = rememberCoroutineScope()
-
-    if(isLoading){
-        Box(Modifier.fillMaxSize()){
-            CircularProgressIndicator(Modifier.align(Alignment.Center))
+fun MtoProductsScreen(
+    navController: NavController,
+    productId: String? = null
+) {
+    val context = LocalContext.current
+    val viewModel: MtoProductoViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MtoProductoViewModel(context.applicationContext as Application) as T
+            }
         }
-    }else{
+    )
 
-        Column (modifier){
-            BarraSuperior(null)
-            Spacer(Modifier.height(8.dp))
-            Id(null)
-            Spacer(Modifier.height(8.dp))
-            NombreProducto(nombre) { viewModel.onProductoChanged(it, precio, descripcion) }
-            Spacer(Modifier.height(8.dp))
-            PrecioProducto(precio) { viewModel.onProductoChanged(nombre, it, descripcion) }
-            Spacer(Modifier.height(8.dp))
-            DescripcionProducto(descripcion) { viewModel.onProductoChanged(nombre, precio, it) }
-            Spacer(Modifier.height(8.dp))
-            Text("Los campos con un \"*\" son obligatorios.",  textAlign = TextAlign.Center, fontSize = 24.sp)
-            Spacer(Modifier.height(8.dp))
-            BotonAccion(botonEnabled) {
-                coroutineScope.launch {
-                    viewModel.onProductSelected()
+    val uiState = viewModel.uiState.collectAsState().value
+    val errorMessage = viewModel.errorMessage.collectAsState().value
+
+    var codigoBarras by remember { mutableStateOf("") }
+    var nombre by remember { mutableStateOf("") }
+    var talla by remember { mutableStateOf("") }
+    var color by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+
+    LaunchedEffect(productId) {
+        productId?.let {
+            delay(100) // Pequeño delay para evitar problemas de inicialización
+            viewModel.loadProduct(it)
+        }
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState is MtoProductsUIState.Editing) {
+            val producto = uiState.producto
+            codigoBarras = producto.codigoBarras
+            nombre = producto.nombre
+            talla = producto.talla
+            color = producto.color
+            descripcion = producto.descripcion ?: ""
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (productId == null) "Nueva Prenda" else "Editar Prenda") }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    val prenda = Prenda(
+                        id = if (productId == null) UUID.randomUUID().toString() else productId,
+                        codigoBarras = codigoBarras,
+                        nombre = nombre,
+                        talla = talla,
+                        color = color,
+                        descripcion = descripcion.ifBlank { null },
+                        imagen = null // Ahora siempre es null
+                    )
+                    viewModel.saveProduct(prenda)
+                }
+            ) {
+                Icon(Icons.Default.Save, contentDescription = "Guardar")
+                Text("Guardar")
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            when (uiState) {
+                MtoProductsUIState.Loading -> {
+                    CircularProgressIndicator(Modifier.fillMaxWidth().padding(16.dp))
+                }
+                is MtoProductsUIState.Editing, MtoProductsUIState.Creating -> {
+                    OutlinedTextField(
+                        value = codigoBarras,
+                        onValueChange = { codigoBarras = it },
+                        label = { Text("Código de Barras") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = nombre,
+                        onValueChange = { nombre = it },
+                        label = { Text("Nombre") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = talla,
+                        onValueChange = { talla = it },
+                        label = { Text("Talla") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = color,
+                        onValueChange = { color = it },
+                        label = { Text("Color") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = descripcion,
+                        onValueChange = { descripcion = it },
+                        label = { Text("Descripción") },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3
+                    )
+                }
+                MtoProductsUIState.Success -> {
+                    Text("¡Guardado exitosamente!", style = MaterialTheme.typography.headlineMedium)
+                    LaunchedEffect(Unit) {
+                        navController.popBackStack()
+                    }
+                }
+                is MtoProductsUIState.Error -> {
+                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
+                }
+            }
+
+            errorMessage?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
+                LaunchedEffect(Unit) {
+                    viewModel.clearErrorMessage()
                 }
             }
         }
-
-    }
-}
-
-@Composable
-fun BarraSuperior(id: String?) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        IconButton(
-            onClick = {},
-            modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Regresar",
-                modifier = Modifier.size(24.dp)
-            )
-        }
-
-        Text(
-            text = if (id != null) "Editar Producto" else "Agregar Producto",
-            modifier = Modifier.align(Alignment.Center),
-            style = MaterialTheme.typography.headlineMedium,
-            fontSize = 24.sp
-        )
-    }
-}
-
-@Composable
-fun Id(id: String?) {
-    if (!id.isNullOrEmpty()) {
-        Text("ID: $id", textAlign = TextAlign.Center, fontSize = 20.sp, modifier = Modifier.fillMaxWidth())
-        Spacer(Modifier.height(8.dp))
-    }
-}
-
-@Composable
-fun NombreProducto(
-    nombre: String,
-    onProductoChanged: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = nombre,
-        onValueChange = { onProductoChanged(it) },
-        label = { Text("Nombre *") },
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-
-@Composable
-fun PrecioProducto(
-    precio: String,
-    onProductoChanged: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = precio,
-        onValueChange = { onProductoChanged(it) },
-        label = { Text("Precio *") },
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        singleLine = true
-    )
-}
-
-@Composable
-fun DescripcionProducto(
-    descripcion: String?,
-    onProductoChanged: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = descripcion ?: "",
-        onValueChange = { onProductoChanged(it) },
-        label = { Text("Descripción") },
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun BotonAccion(
-    loginEnabled: Boolean,
-    onProductSelected: () -> Unit
-) {
-    Button(
-        onClick = { onProductSelected() },
-        enabled = loginEnabled
-    ) {
-        Text("Guardar Datos")
     }
 }

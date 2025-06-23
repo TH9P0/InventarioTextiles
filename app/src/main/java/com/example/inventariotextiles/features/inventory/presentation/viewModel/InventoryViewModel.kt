@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 
 class InventoryViewModel:ViewModel() {
     val menuItems = listOf(
-        "Consultar" to "PantallaConsultar",
-        "Modificar" to "PantallaModificar",
+        "Consultar" to "ListaProductosScreen",
+        "Modificar" to "MtoProductoScreen",
         "Reportes" to "PantallaReportes"
     )
 }

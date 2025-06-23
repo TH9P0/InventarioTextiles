@@ -1,13 +1,20 @@
 package com.example.inventariotextiles.data.local
 
-
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import androidx.core.graphics.scale
+import com.example.inventariotextiles.R
+import com.example.inventariotextiles.domain.model.Prenda
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", null, 1) {
+    private val context: Context = context
 
     // Definición de tablas y columnas
     object Tablas {
@@ -30,6 +37,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
         const val TALLA = "Talla"
         const val COLOR = "Color"
         const val DESCRIPCION = "Descripcion"
+        const val IMAGEN = "imagen"
 
         // Cargos
         const val ID_CARGO = "ID_Cargo"
@@ -58,6 +66,33 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
         const val PACKING_LIST_ID = "PackingList_id"
     }
 
+    private fun insertarPrendasDePrueba(db: SQLiteDatabase) {
+        val prendas = listOf(
+            ContentValues().apply {
+                put(Columnas.ID, UUID.randomUUID().toString())
+                put(Columnas.CODIGO_BARRAS, "123456789")
+                put(Columnas.NOMBRE, "Camiseta Blanca")
+                put(Columnas.TALLA, "M")
+                put(Columnas.COLOR, "Blanco")
+                put(Columnas.DESCRIPCION, "Camiseta de algodón 100%")
+                put(Columnas.IMAGEN, convertImageToBase64(context, R.drawable.camiseta_ejemplo))
+            },
+            ContentValues().apply {
+                put(Columnas.ID, UUID.randomUUID().toString())
+                put(Columnas.CODIGO_BARRAS, "987654321")
+                put(Columnas.NOMBRE, "Pantalón Vaquero")
+                put(Columnas.TALLA, "32")
+                put(Columnas.COLOR, "Azul")
+                put(Columnas.DESCRIPCION, "Pantalón de mezclilla resistente")
+                put(Columnas.IMAGEN, convertImageToBase64(context, R.drawable.pantalon_ejemplo))
+            }
+        )
+
+        prendas.forEach { values ->
+            db.insert(Tablas.PRENDAS, null, values)
+        }
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         // Crear tablas
         crearTablaPrendas(db)
@@ -71,6 +106,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
         // Insertar datos iniciales
         insertarCargosIniciales(db)
         insertarUsuarioAdmin(db)
+        insertarPrendasDePrueba(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -93,7 +129,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
                 ${Columnas.NOMBRE} TEXT NOT NULL,
                 ${Columnas.TALLA} TEXT NOT NULL,
                 ${Columnas.COLOR} TEXT NOT NULL,
-                ${Columnas.DESCRIPCION} TEXT
+                ${Columnas.DESCRIPCION} TEXT,
+                ${Columnas.IMAGEN} TEXT 
             );
         """.trimIndent()
         db.execSQL(query)
@@ -207,27 +244,46 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
         db.insert(Tablas.USUARIOS, null, admin)
     }
 
-    // Métodos de ejemplo para operaciones CRUD de prendas
-    fun agregarPrenda(codigoBarras: String, nombre: String, talla: String, color: String, descripcion: String?): Long {
+    // Métodos para operaciones CRUD de prendas
+    fun agregarPrenda(prenda: Prenda): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(Columnas.ID, UUID.randomUUID().toString())
-            put(Columnas.CODIGO_BARRAS, codigoBarras)
-            put(Columnas.NOMBRE, nombre)
-            put(Columnas.TALLA, talla)
-            put(Columnas.COLOR, color)
-            put(Columnas.DESCRIPCION, descripcion)
+            put(Columnas.CODIGO_BARRAS, prenda.codigoBarras)
+            put(Columnas.NOMBRE, prenda.nombre)
+            put(Columnas.TALLA, prenda.talla)
+            put(Columnas.COLOR, prenda.color)
+            put(Columnas.DESCRIPCION, prenda.descripcion)
+            put(Columnas.IMAGEN, prenda.imagen)
         }
         return db.insert(Tablas.PRENDAS, null, values)
     }
 
-    fun obtenerPrendaPorCodigo(codigo: String): Prenda? {
+    fun actualizarPrenda(prenda: Prenda): Int {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(Columnas.CODIGO_BARRAS, prenda.codigoBarras)
+            put(Columnas.NOMBRE, prenda.nombre)
+            put(Columnas.TALLA, prenda.talla)
+            put(Columnas.COLOR, prenda.color)
+            put(Columnas.DESCRIPCION, prenda.descripcion)
+            put(Columnas.IMAGEN, prenda.imagen)
+        }
+        return db.update(
+            Tablas.PRENDAS,
+            values,
+            "${Columnas.ID} = ?",
+            arrayOf(prenda.id)
+        )
+    }
+
+    fun obtenerPrendaPorId(id: String): Prenda? {
         val db = readableDatabase
         val cursor = db.query(
             Tablas.PRENDAS,
             null,
-            "${Columnas.CODIGO_BARRAS} = ?",
-            arrayOf(codigo),
+            "${Columnas.ID} = ?",
+            arrayOf(id),
             null, null, null
         )
         return if (cursor.moveToFirst()) {
@@ -237,28 +293,57 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "inventario.db", nu
                 nombre = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.NOMBRE)),
                 talla = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.TALLA)),
                 color = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.COLOR)),
-                descripcion = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.DESCRIPCION))
+                descripcion = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.DESCRIPCION)),
+                imagen = cursor.getString(cursor.getColumnIndexOrThrow(Columnas.IMAGEN))
             )
         } else {
             null
         }.also { cursor.close() }
     }
 
-    // Clases de modelo
-    data class Prenda(
-        val id: String,
-        val codigoBarras: String,
-        val nombre: String,
-        val talla: String,
-        val color: String,
-        val descripcion: String?
-    )
+    fun obtenerTodasLasPrendas(): List<Prenda> {
+        val db = readableDatabase
+        val prendas = mutableListOf<Prenda>()
+        val cursor = db.query(
+            Tablas.PRENDAS,
+            null, null, null, null, null, null
+        )
 
-    data class Usuario(
-        val id: String,
-        val nombre: String,
-        val usuario: String,
-        val password: String,
-        val cargo: Int
-    )
+        cursor.use {
+            while (it.moveToNext()) {
+                prendas.add(
+                    Prenda(
+                        id = it.getString(it.getColumnIndexOrThrow(Columnas.ID)),
+                        codigoBarras = it.getString(it.getColumnIndexOrThrow(Columnas.CODIGO_BARRAS)),
+                        nombre = it.getString(it.getColumnIndexOrThrow(Columnas.NOMBRE)),
+                        talla = it.getString(it.getColumnIndexOrThrow(Columnas.TALLA)),
+                        color = it.getString(it.getColumnIndexOrThrow(Columnas.COLOR)),
+                        descripcion = it.getString(it.getColumnIndexOrThrow(Columnas.DESCRIPCION)),
+                        imagen = it.getString(it.getColumnIndexOrThrow(Columnas.IMAGEN))
+                    )
+                )
+            }
+        }
+        return prendas
+    }
+
+    fun eliminarPrenda(id: String): Int {
+        val db = writableDatabase
+        return db.delete(
+            Tablas.PRENDAS,
+            "${Columnas.ID} = ?",
+            arrayOf(id)
+        )
+    }
+
+    fun convertImageToBase64(context: Context, drawableId: Int): String {
+        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId)
+        val scaledBitmap = bitmap.scale(100, 100)
+
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
 }

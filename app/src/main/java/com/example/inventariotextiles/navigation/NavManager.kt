@@ -2,12 +2,17 @@ package com.example.inventariotextiles.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.inventariotextiles.features.audit.presentation.view.AuditMenu
 import com.example.inventariotextiles.features.container.presentation.view.ContainerMenu
 import com.example.inventariotextiles.features.inventory.presentation.view.InventoryMenu
+import com.example.inventariotextiles.features.inventory.presentation.view.ListaProductosScreen
+import com.example.inventariotextiles.features.inventory.presentation.view.MtoProductsScreen
+import com.example.inventariotextiles.features.inventory.presentation.view.PantallaReportes
 import com.example.inventariotextiles.features.packingList.presentation.view.CreatePackingList
 import com.example.inventariotextiles.features.packingList.presentation.view.PackingListMenu
 import com.example.inventariotextiles.features.transfer.presentation.view.TransferClothes
@@ -48,6 +53,25 @@ fun NavManager() {
         composable("InventoryMenu"){
             InventoryMenu(navController)
         }
+        composable("ListaProductosScreen") {
+            ListaProductosScreen(navController = navController)
+        }
+        composable(
+            "MtoProductoScreen/{productId}",
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+            MtoProductsScreen(
+                navController = navController,
+                productId = productId  // Solo estos 2 parámetros
+            )
+        }
+
+        composable("PantallaReportes") {
+            // Asegúrate de crear esta pantalla
+            PantallaReportes(navController)
+        }
+
 
         // Navigation in Container Menu
         composable("ContainerMenu"){
